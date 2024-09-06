@@ -33,6 +33,7 @@ int main() {
                 std::string text;
                 std::getline(std::cin >> std::ws, text);
                 editor.insertText(text);
+                editor.debugPrint();
             } else if (command == "d") {
                 int count;
                 std::cin >> count;
@@ -40,7 +41,9 @@ int main() {
             } else if (command == "m") {
                 int row, col;
                 std::cin >> row >> col;
+                editor.debugPrint();
                 editor.moveCursor(row, col);
+                editor.debugPrint();
             } else if (command == "g") {
                 int line;
                 std::cin >> line;

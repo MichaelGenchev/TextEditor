@@ -55,7 +55,6 @@ void Cursor::setPosition(const Rope& text, size_t newRow, size_t newCol) {
     if (newRow >= totalLines) {
         throw std::out_of_range("Row is out of range");
     }
-    std::cout << "here are the total lines`; " << totalLines << std::endl;
 
     size_t lineLength = getLineLength(text, newRow);
     if (newCol > lineLength) {

@@ -31,64 +31,63 @@ char Rope::operator[](size_t i) const {
 // Helper func to concatenate two nodes
 
 std::shared_ptr<Rope::Node> Rope::concat(std::shared_ptr<Node> left, std::shared_ptr<Node> right) {
-    std::cout << "CONCAT: left:" << left << " right: " << right << std::endl;
     if (!left) return right;
     if (!right) return left;
     auto newNode = std::make_shared<Node>("");
-    std::cout << "made new node" << std::endl;
     assert(newNode);  // Ensure allocation succeeded
     newNode->left = left;
     newNode->right = right;
-    newNode->weight = left->weight + (right ? right->weight : 0);  // More accurate weight calculation
+    newNode->weight = left->weight;  // Weight should be the weight of the left subtree
     return newNode;
 }
 
 // Helper func to split a node ata a given index
-
 std::pair<std::shared_ptr<Rope::Node>, std::shared_ptr<Rope::Node>> Rope::split(std::shared_ptr<Node> node, size_t i) {
     if (!node) return {nullptr, nullptr};
     if (i == 0) return {nullptr, node};
-    if (i >= node->weight) {
+
+    size_t leftWeight = node->left ? node->left->weight : 0;
+
+    if (i <= leftWeight) {
+        auto [left, right] = split(node->left, i);
+        node->left = right;
+        node->weight = (right ? right->weight : 0) + node->data.length() + (node->right ? node->right->weight : 0);
+        return {left, node};
+    } else if (i < node->weight) {
+        size_t splitPoint = i - leftWeight;
+        auto newLeft = std::make_shared<Node>(node->data.substr(0, splitPoint));
+        newLeft->left = node->left;
+        newLeft->weight = leftWeight + splitPoint;
+        
+        node->data = node->data.substr(splitPoint);
+        node->left = nullptr;
+        node->weight -= i;
+        
+        return {newLeft, node};
+    } else {
         auto [left, right] = split(node->right, i - node->weight);
-        return {concat(node->left, left), right};
+        node->right = left;
+        node->weight += (left ? left->weight : 0);
+        return {node, right};
     }
-    auto [left, right] = split(node->left, i);
-    node->left = right;
-    node->weight -= i;
-    return {left, node};
 }
 
 // Helper func to insert a string at a given index
 void Rope::insert(std::shared_ptr<Node>& node, size_t i, const std::string& str) {
-    std::cout << "Insert at position: " << i << ", string: " << str << std::endl;
-    std::cout << "Original NODE: " << node << std::endl;
-    
-    if (i > length()) {
-        throw std::out_of_range("Insert position out of range");
-    }
-    
+    std::cout << "Inserting '" << str << "' at index " << i << std::endl;
+    std::cout << "Current rope content: " << to_string() << std::endl;
+
     auto [left, right] = split(node, i);
-    std::cout << "After split - LEFT: " << left << ", RIGHT: " << right << std::endl;
-
     auto strNode = std::make_shared<Node>(str);
-    std::cout << "New string node: " << strNode << std::endl;
-
+    strNode->weight = str.length();
     auto leftConcat = concat(left, strNode);
-    std::cout << "After first concat: " << leftConcat << std::endl;
-
     node = concat(leftConcat, right);
-    std::cout << "Final node after insert: " << node << std::endl;
-
-    std::cout << "Final node left " << node->left << std::endl;
-    std::cout << "Final node right " << node->right << std::endl;
+    std::cout << "After insertion: " << to_string() << std::endl;
 
 }
 
 //Public insert func
 void Rope::insert(size_t i, const std::string& str) {
-    std::cout << i << ": " << str << std::endl;
-    std::cout << "length " << length() << std::endl;
-    std::cout << "root: " << root << std::endl;
     if (i > length()) throw std::out_of_range("Index out of range");
     insert(root, i , str);
 }

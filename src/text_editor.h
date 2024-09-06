@@ -58,7 +58,7 @@ public:
 
     // Viewport operations
     void setViewportHeight(size_t height);
-    void scrollUp();
+    // void scrollUp();
     void scrollDown();
     std::vector<std::string> getViewportContent() const;
 

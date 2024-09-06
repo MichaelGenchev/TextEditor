@@ -254,7 +254,6 @@ std::vector<std::string> TextEditor::getWrappedLines(size_t startLine, size_t en
 
 void TextEditor::executeCommand(std::unique_ptr<Command> command) {
     command->execute();
-    std::cout << "After executing command i have to do stack things" << std::endl;
     undoStack.push_back(std::move(command));
     redoStack.clear();
 }
@@ -263,7 +262,6 @@ void TextEditor::executeCommand(std::unique_ptr<Command> command) {
 
 void TextEditor::insertTextAt(const std::string& str, size_t position) {
     text.insert(position, str);
-    std::cout << "AFTER text.insert i will set the position of the cursorrr" << std::endl;
     cursor.setPosition(text, cursor.getRow(), cursor.getCol() + str.length());
 }
 
