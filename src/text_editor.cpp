@@ -22,6 +22,7 @@ class DeleteCommand : public Command {
 public: 
     DeleteCommand(TextEditor& e, size_t count, size_t pos) : editor(e), position(pos) {
         deletedText = editor.getTextAt(pos, count);
+        std::cout << "DELETED TEXT: " << deletedText << std::endl;
     }
     void execute() override { editor.deleteTextAt(deletedText.length(), position); }
     void undo() override { editor.insertTextAt(deletedText, position); }
@@ -137,19 +138,23 @@ void TextEditor::redo() {
 
 std::vector<size_t> TextEditor::find(const std::string& searchStr) const {
     std::vector<size_t> positions;
+    std::cout << "Inside find function" << std::endl;
     size_t pos = 0;
     while ((pos = text.to_string().find(searchStr, pos)) != std::string::npos) {
         positions.push_back(pos);
         pos += searchStr.length();
     }
+    std::cout << "Positions: " << positions[0] << std::endl;
     return positions;
 }
 
 void TextEditor::replace(const std::string& searchStr, const std::string& replaceStr) {
     auto positions = find(searchStr);
     for (auto it = positions.rbegin(); it != positions.rend(); ++it) {
-        executeCommand(std::make_unique<DeleteCommand>(*this, searchStr.length(), *it));
-        executeCommand(std::make_unique<InsertCommand>(*this, replaceStr, *it));
+        if (*it + searchStr.length() <= text.length()) {
+            executeCommand(std::make_unique<DeleteCommand>(*this, searchStr.length(), *it));
+            executeCommand(std::make_unique<InsertCommand>(*this, replaceStr, *it));
+        }
     }
 }
 
@@ -266,8 +271,14 @@ void TextEditor::insertTextAt(const std::string& str, size_t position) {
 }
 
 void TextEditor::deleteTextAt(size_t count, size_t position) {
-    text.remove(position, position + count);
-    cursor.setPosition(text, cursor.getRow(), cursor.getCol() - count);
+    std::cout << "cursor before deleting the text: " << cursor.getCol() << std::endl;
+    text.remove(position, position + count);  // Changed to remove 'count' characters starting at 'position'
+    std::cout << "TEXT AFTER REMOVING: " << text.to_string() << std::endl;
+    
+    size_t newCol = (cursor.getCol() > count) ? cursor.getCol() - count : 0;
+    std::cout << "CURSOR COL: " << newCol << std::endl;
+    
+    cursor.setPosition(text, cursor.getRow(), newCol);
 }
 
 std::string TextEditor::getTextAt(size_t position, size_t count) const {
