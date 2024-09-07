@@ -272,7 +272,7 @@ void TextEditor::insertTextAt(const std::string& str, size_t position) {
 
 void TextEditor::deleteTextAt(size_t count, size_t position) {
     std::cout << "cursor before deleting the text: " << cursor.getCol() << std::endl;
-    text.remove(position, position + count);  // Changed to remove 'count' characters starting at 'position'
+    text.remove(position, position + count);
     std::cout << "TEXT AFTER REMOVING: " << text.to_string() << std::endl;
     
     size_t newCol = (cursor.getCol() > count) ? cursor.getCol() - count : 0;
